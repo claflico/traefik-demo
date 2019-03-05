@@ -1,0 +1,49 @@
+version: '2'
+services:
+  traefik:
+    image: traefik
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    ports:
+    - 80:80/tcp
+    - 8080:8080/tcp
+    command:
+    - --consul
+    - --consul.endpoint=10.42.0.1:8500
+    - --consul.prefix=traefik
+    labels:
+      io.rancher.container.hostname_override: container_name
+      io.rancher.container.pull_image: always
+      logforwarding: 'true'
+  consulator:
+    image: lewispeckover/consulator:0.4.3
+    environment:
+      CONSUL_HTTP_ADDR: 10.42.0.1:8500
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /vagrant/scripts/compose/traefik-demo/cattle/traefik-consul/config:/config:ro
+    command:
+    - consulator
+    - import
+    - -yaml
+    - /config
+    labels:
+      io.rancher.container.start_once: 'true'
+  pmorjan-demo1-1:
+    image: pmorjan/demo
+    labels:
+      io.rancher.container.hostname_override: container_name
+      io.rancher.container.pull_image: always
+      io.rancher.container.requested_ip: 10.42.200.100
+  pmorjan-demo1-2:
+    image: pmorjan/demo
+    labels:
+      io.rancher.container.hostname_override: container_name
+      io.rancher.container.pull_image: always
+      io.rancher.container.requested_ip: 10.42.200.101
+  pmorjan-demo2:
+    image: pmorjan/demo
+    labels:
+      io.rancher.container.hostname_override: container_name
+      io.rancher.container.pull_image: always
+      io.rancher.container.requested_ip: 10.42.200.200

@@ -1,0 +1,52 @@
+---
+
+api:
+  entrypoint: 'traefik'
+  dashboard: 'true'
+
+backends:
+  backend-demo1:
+    buffering:
+      retryexpression: 'IsNetworkError()'
+    circuitbreaker:
+      expression: 'NetworkErrorRatio() > 0.5'
+    servers:
+      server1:
+        url: 'http://10.42.200.100:8080'
+      server2:
+        url: 'http://10.42.200.101:8080'
+  backend-demo2:
+    buffering:
+      retryexpression: 'IsNetworkError()'
+    circuitbreaker:
+      expression: 'NetworkErrorRatio() > 0.5'
+    servers:
+      server1:
+        url: 'http://10.42.200.200:8080'
+
+defaultentrypoints:
+  0: 'http'
+
+entrypoints:
+  http:
+    address: ':80'
+
+frontends:
+  frontend-Host-demo1-lvh-me:
+    backend: 'backend-demo1'
+    routes:
+      default:
+        rule: 'Host:demo1.lvh.me'
+  frontend-Host-demo2-lvh-me:
+    backend: 'backend-demo2'
+    routes:
+      default:
+        rule: 'Host:demo2.lvh.me'
+
+loglevel: DEBUG
+
+ping:
+  entrypoint: 'traefik'
+
+web:
+  address: ':8080'
